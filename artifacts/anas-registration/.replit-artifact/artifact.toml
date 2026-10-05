@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Anas Registration"
+description = "An Arabic-first registration and review experience for documenting local activities, with a public multi-step submission flow, confirmation page, and a companion admin records dashboard."
+version = "1.0.0"
+id = "artifacts/anas-registration"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19489
+
+[services.development]
+run = "pnpm --filter @workspace/anas-registration run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/anas-registration", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/anas-registration/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19489"
+BASE_PATH = "/"

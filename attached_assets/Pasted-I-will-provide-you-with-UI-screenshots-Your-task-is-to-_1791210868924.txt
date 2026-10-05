@@ -1,0 +1,651 @@
+I will provide you with UI screenshots. Your task is to implement the frontend shown in the screenshots as a production-ready **Next.js + TypeScript** application.
+
+Do NOT start coding immediately. First analyze all screenshots carefully, identify the screens, reusable UI patterns, components, user flows, and shared behavior. Then implement the UI.
+
+## 1. Tech Stack
+
+Use:
+
+* Next.js (App Router)
+* TypeScript
+* React
+* Tailwind CSS
+* shadcn/ui where appropriate
+* React Query / TanStack Query for server-state
+* Axios for API communication
+* Zod for validation when needed
+* React Hook Form for forms when needed
+* Lucide React for icons
+
+Use clean, strongly typed, production-quality TypeScript.
+
+---
+
+# 2. REQUIRED ARCHITECTURE
+
+The project MUST follow a **Feature-Based Architecture**.
+
+Do NOT create a traditional architecture such as:
+
+```text
+components/
+hooks/
+services/
+utils/
+pages/
+```
+
+with everything mixed together.
+
+Instead, organize business functionality inside `features`.
+
+Use a structure similar to:
+
+```text
+src/
+├── app/
+│   ├── layout.tsx
+│   ├── page.tsx
+│   ├── globals.css
+│   └── ...
+│
+├── features/
+│   ├── feature-name/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── services/
+│   │   ├── config/
+│   │   ├── utils/
+│   │   ├── types/
+│   │   ├── constants/
+│   │   └── index.ts
+│   │
+│   └── another-feature/
+│       ├── components/
+│       ├── hooks/
+│       ├── services/
+│       ├── config/
+│       ├── utils/
+│       ├── types/
+│       ├── constants/
+│       └── index.ts
+│
+├── shared/
+│   ├── components/
+│   ├── hooks/
+│   ├── types/
+│   ├── constants/
+│   ├── utils/
+│   └── ...
+│
+├── infrastructure/
+│   ├── api/
+│   │   ├── axios-instance.ts
+│   │   ├── interceptors.ts
+│   │   └── ...
+│   │
+│   ├── query/
+│   │   ├── query-client.ts
+│   │   └── ...
+│   │
+│   └── ...
+│
+└── config/
+    └── ...
+```
+
+Adapt the exact folder names according to the actual features identified from the screenshots, but preserve this architectural philosophy.
+
+---
+
+# 3. FEATURE ISOLATION
+
+Every business domain should live inside its own feature.
+
+For example, if the screenshots contain:
+
+* Authentication
+* Dashboard
+* Products
+* Orders
+* Users
+* Integrations
+* Settings
+
+then structure them as:
+
+```text
+features/
+├── auth/
+├── dashboard/
+├── products/
+├── orders/
+├── users/
+├── integrations/
+└── settings/
+```
+
+Each feature owns its own:
+
+```text
+components/
+hooks/
+services/
+config/
+utils/
+types/
+constants/
+```
+
+Do NOT move feature-specific logic into `shared`.
+
+Only truly reusable code belongs in `shared`.
+
+---
+
+# 4. SHARED LAYER
+
+The `shared` folder should contain only reusable, business-agnostic code.
+
+Examples:
+
+```text
+shared/
+├── components/
+│   ├── Button/
+│   ├── Input/
+│   ├── Modal/
+│   ├── DataTable/
+│   ├── EmptyState/
+│   ├── LoadingState/
+│   └── ...
+│
+├── hooks/
+│   ├── useDebounce.ts
+│   ├── useMediaQuery.ts
+│   └── ...
+│
+├── utils/
+│   ├── format-date.ts
+│   ├── format-currency.ts
+│   └── ...
+│
+├── types/
+└── constants/
+```
+
+Do not put business-specific components here.
+
+For example:
+
+`ProductCard` belongs in `features/products/components`, NOT `shared/components`.
+
+A generic `Card` belongs in `shared/components`.
+
+---
+
+# 5. INFRASTRUCTURE
+
+Create an `infrastructure` layer for technical concerns that should not belong to a specific feature.
+
+For example:
+
+```text
+infrastructure/
+├── api/
+│   ├── axios-instance.ts
+│   ├── interceptors.ts
+│   └── api-error.ts
+│
+├── query/
+│   └── query-client.ts
+│
+└── ...
+```
+
+Create a centralized Axios instance.
+
+Do NOT create multiple Axios instances inside individual features unless there is a strong architectural reason.
+
+Feature services should use the centralized API client.
+
+Example:
+
+```text
+features/products/services/product.service.ts
+```
+
+should use:
+
+```text
+infrastructure/api/axios-instance.ts
+```
+
+instead of creating its own Axios instance.
+
+---
+
+# 6. SERVER STATE
+
+Use TanStack Query for server state.
+
+Do NOT use:
+
+```text
+useEffect + useState
+```
+
+for data fetching when React Query is appropriate.
+
+For each feature, keep query/mutation logic inside feature hooks.
+
+Example:
+
+```text
+features/products/
+├── hooks/
+│   ├── use-products.ts
+│   ├── use-product.ts
+│   ├── use-create-product.ts
+│   └── use-update-product.ts
+│
+└── services/
+    └── product.service.ts
+```
+
+Keep API communication separate from UI components.
+
+Components should NOT contain raw Axios calls.
+
+---
+
+# 7. COMPONENT DESIGN
+
+Build reusable components based on the screenshots.
+
+Avoid creating one giant component such as:
+
+```text
+Dashboard.tsx
+```
+
+containing the entire page.
+
+Break the UI into meaningful components.
+
+For example:
+
+```text
+features/dashboard/
+├── components/
+│   ├── DashboardHeader.tsx
+│   ├── StatsCards.tsx
+│   ├── StatsCard.tsx
+│   ├── RecentActivity.tsx
+│   ├── ActivityItem.tsx
+│   └── ...
+```
+
+Components should have a single clear responsibility.
+
+---
+
+# 8. NEXT.JS APP ROUTER
+
+Use the App Router correctly.
+
+Keep route files inside:
+
+```text
+src/app/
+```
+
+but keep business logic inside `features`.
+
+For example:
+
+```text
+app/
+├── dashboard/
+│   └── page.tsx
+│
+features/
+└── dashboard/
+    ├── components/
+    ├── hooks/
+    ├── services/
+    └── ...
+```
+
+The route page should mainly compose the feature rather than contain all business logic.
+
+Example:
+
+```tsx
+import { DashboardPage } from "@/features/dashboard";
+
+export default function Page() {
+  return <DashboardPage />;
+}
+```
+
+---
+
+# 9. BARREL EXPORTS
+
+Use feature-level barrel exports when useful.
+
+Example:
+
+```text
+features/products/index.ts
+```
+
+Then:
+
+```tsx
+import { ProductsPage } from "@/features/products";
+```
+
+Avoid unnecessarily deep imports when a clean public feature API can be provided.
+
+---
+
+# 10. TYPESCRIPT
+
+Use strict TypeScript.
+
+Avoid:
+
+```tsx
+any
+```
+
+unless absolutely unavoidable.
+
+Create proper domain types inside the relevant feature:
+
+```text
+features/products/types/
+```
+
+Do not create one giant global types file containing all application types.
+
+---
+
+# 11. CONFIGURATION
+
+Feature-specific configuration belongs inside:
+
+```text
+features/<feature>/config/
+```
+
+Application-wide configuration belongs outside features.
+
+For example:
+
+```text
+features/integrations/config/integration-config.ts
+```
+
+while global environment/API configuration belongs to:
+
+```text
+config/
+```
+
+---
+
+# 12. UI / SCREENSHOT ACCURACY
+
+The screenshots are the source of truth for the visual design.
+
+Reproduce them as accurately as possible:
+
+* Layout
+* Spacing
+* Typography
+* Font sizes
+* Font weights
+* Colors
+* Borders
+* Border radius
+* Shadows
+* Icons
+* Buttons
+* Inputs
+* Tables
+* Cards
+* Modals
+* Sidebars
+* Navigation
+* Responsive behavior
+
+Do not redesign the UI unless absolutely necessary.
+
+Do not replace the design with generic dashboard components.
+
+If something is visible in the screenshot, reproduce it.
+
+---
+
+# 13. RESPONSIVENESS
+
+The implementation must be responsive.
+
+Support:
+
+* Desktop
+* Tablet
+* Mobile
+
+Do not simply shrink the desktop UI.
+
+Analyze the screenshots and infer appropriate responsive behavior.
+
+For example:
+
+* Sidebar may collapse
+* Tables may become horizontally scrollable or transform into cards
+* Grid columns should adapt
+* Navigation may change
+* Spacing should adjust appropriately
+
+---
+
+# 14. DESIGN SYSTEM
+
+Extract repeated visual patterns into reusable components.
+
+If several screenshots use the same:
+
+* Button
+* Input
+* Card
+* Modal
+* Table
+* Badge
+* Dropdown
+* Tabs
+* Form field
+* Empty state
+
+create reusable components rather than duplicating markup.
+
+Use shadcn/ui where it improves consistency, but customize it to match the screenshots.
+
+---
+
+# 15. BUSINESS LOGIC
+
+Do not put business logic directly inside JSX.
+
+Bad:
+
+```tsx
+const filtered = products.filter(...);
+const formatted = ...
+```
+
+with complex logic inside the component.
+
+Prefer:
+
+```text
+features/products/
+├── utils/
+├── hooks/
+└── services/
+```
+
+Keep components primarily responsible for rendering and user interaction.
+
+---
+
+# 16. API LAYER
+
+Assume the backend will be connected later.
+
+Create clean service abstractions.
+
+Example:
+
+```text
+features/products/services/product.service.ts
+```
+
+```ts
+export const productService = {
+  getProducts: async () => {},
+  getProduct: async (id: string) => {},
+  createProduct: async (data: CreateProductDto) => {},
+};
+```
+
+Do not hardcode API URLs throughout components.
+
+Use environment variables/configuration.
+
+---
+
+# 17. MOCK DATA
+
+If the backend is not available yet, use typed mock data.
+
+Keep mock data separate from components.
+
+Example:
+
+```text
+features/products/
+├── mocks/
+│   └── products.mock.ts
+```
+
+The UI should still be structured so replacing mocks with real API calls is straightforward.
+
+---
+
+# 18. STATE MANAGEMENT
+
+Do not introduce global state unnecessarily.
+
+Use:
+
+* React local state for local UI state
+* TanStack Query for server state
+* A global state solution only when genuinely required
+
+Avoid putting everything into Zustand/Redux.
+
+---
+
+# 19. CODE QUALITY
+
+Follow these principles:
+
+* SOLID
+* Separation of concerns
+* DRY
+* Composition over duplication
+* Single responsibility
+* Strong typing
+* Feature isolation
+* Reusable components
+* Clean imports
+* No unnecessary abstractions
+
+Avoid overengineering.
+
+The architecture should be scalable but practical.
+
+---
+
+# 20. IMPORTANT — BEFORE CODING
+
+Before implementing:
+
+1. Analyze all screenshots.
+2. Identify all pages/routes.
+3. Identify all business features.
+4. Identify reusable components.
+5. Identify shared components.
+6. Identify feature-specific components.
+7. Identify forms and validation.
+8. Identify server-state requirements.
+9. Identify responsive behavior.
+10. Design the folder structure.
+11. Then implement.
+
+Do NOT create the entire application inside one feature or one page.
+
+---
+
+# 21. EXPECTED RESULT
+
+I want a production-quality frontend that another senior developer can continue working on easily.
+
+The final architecture should clearly communicate:
+
+```text
+app
+  ↓
+features
+  ↓
+shared / infrastructure
+```
+
+with clear separation between:
+
+```text
+UI
+Business Logic
+API Services
+Server State
+Shared Components
+Infrastructure
+Configuration
+```
+
+The code should be maintainable when the application grows to dozens of screens and multiple developers.
+
+---
+
+## FINAL INSTRUCTION
+
+I will now provide screenshots.
+
+Treat the screenshots as the primary UI specification.
+
+First understand the complete UI and architecture, then implement it.
+
+Do not sacrifice architecture for speed.
+
+Do not put feature-specific code into shared folders.
+
+Do not create a monolithic page component.
+
+Do not create random folders just to satisfy the structure.
+
+Every file should have a clear responsibility and belong to the correct architectural layer.
