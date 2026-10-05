@@ -8,20 +8,16 @@ router = "path"
 
 [[services]]
 name = "web"
-paths = [ "/" ]
+paths = [ "/", "/_next/hmr" ]
 localPort = 19489
 
 [services.development]
-run = "pnpm --filter @workspace/anas-registration run dev"
+run = "cd ../.. && pnpm dev"
 
 [services.production]
-build = [ "pnpm", "--filter", "@workspace/anas-registration", "run", "build" ]
+build = [ "pnpm", "--dir", "../..", "run", "build" ]
 serve = "static"
-publicDir = "artifacts/anas-registration/dist/public"
-
-[[services.production.rewrites]]
-from = "/*"
-to = "/index.html"
+publicDir = "out"
 
 [services.env]
 PORT = "19489"

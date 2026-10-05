@@ -1,45 +1,45 @@
-# [Project name]
+# Anas Registration
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+An Arabic-first frontend for registering local activities in Fayoum and reviewing demo records in a browser-local admin view.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- `pnpm dev` — run the Next.js frontend
+- `pnpm run typecheck` — typecheck the frontend
+- `pnpm run build` — create the static export in `out/`
+- No API, database, or required application secrets; demo records stay in browser storage.
 
 ## Stack
 
-- pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- Next.js App Router, React, TypeScript, and a single root-level `package.json`
+- Static export for deployment; browser `localStorage` holds demo registrations and admin status changes
+- CSS is organized in the app source; no utility-CSS build pipeline is required
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `src/app/` — App Router pages and root layout
+- `src/features/registration/` — landing, registration wizard, confirmation, and browser-local data
+- `src/features/records/` — demo admin records dashboard
+- `src/shared/` — reusable modal and privacy notice
+- `public/` — static assets
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Feature folders are source organization only; dependencies and scripts belong to the root manifest.
+- Static export is intentional: there is no separate API or server-side data layer.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+The app lets users register a local activity through a four-step Arabic form, see a confirmation, and explore sample/admin records stored only in the browser.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Keep this as one frontend Next.js + TypeScript app with one root `package.json` and feature-based folders.
+- Do not add an API or database; retain browser-local demo behavior.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Browser storage must only be read after hydration or from user events so exported routes remain safe to render.
 
 ## Pointers
 
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
