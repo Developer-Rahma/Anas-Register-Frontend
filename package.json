@@ -9,12 +9,18 @@
   },
   "private": true,
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^25.3.3",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
+    "lightningcss-win32-x64-msvc": "1.32.0",
+   "postcss": "8.5.28",
+    "tailwindcss" : "^4.3.3",
     "typescript": "~5.9.3"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.90.20",
+    "axios": "^1.13.2",
     "lucide-react": "catalog:",
     "next": "^16.3.8",
     "react": "catalog:",

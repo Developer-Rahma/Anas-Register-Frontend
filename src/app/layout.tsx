@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { PrivacyNotice } from '../shared/PrivacyNotice';
+import { Providers } from './providers';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -14,8 +15,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="ar" dir="rtl">
       <body>
-        {children}
-        <PrivacyNotice />
+        <Providers>
+          {children}
+          <PrivacyNotice />
+        </Providers>
       </body>
     </html>
   );

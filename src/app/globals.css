@@ -1,5 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
-@import '../anas.css';
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
+
+@import "tailwindcss";
+
+@import "../anas.css";
 
 :root {
   color-scheme: light;
@@ -18,7 +21,7 @@ body {
   min-height: 100vh;
   margin: 0;
   color: #173f34;
-  font-family: 'IBM Plex Sans Arabic', Manrope, sans-serif;
+  font-family: "IBM Plex Sans Arabic", Manrope, sans-serif;
 }
 
 button,

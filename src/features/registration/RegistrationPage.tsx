@@ -3,9 +3,13 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, Check, CircleHelp, Copy, FileText, Menu, Phone, Share2, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BedDouble, BriefcaseBusiness, CarFront, Check, CircleHelp, Copy, Ellipsis, FileText, GraduationCap, MapPinned, Phone, Share2, ShieldCheck, Utensils, UsersRound,  type LucideIcon } from 'lucide-react';
 import { Modal } from '../../shared/Modal';
-import { categories, centers, needsList, recordStore, type Entry, type RegistrationDraft } from './data';
+import { SiteFooter, SiteHeader } from '../../shared/SiteChrome';
+import { categories, centers, needsList, type RegistrationDraft } from './data';
+import { getApiErrorMessage } from '../../infrastructure/http/api-error';
+import { useCreateRegistration } from '../registrations/hooks/useCreateRegistration';
+import type { RegistrationConfirmation } from '../registrations/types/registration.types';
 
 const blank: RegistrationDraft = {
   name: '', phone: '', project: '', center: '', location: '', landmark: '', category: '', specialties: [], status: 'قائم طوال العام',
@@ -22,28 +26,58 @@ const categoriesDetails: Record<string, string[]> = {
   'نشاط آخر': [],
 };
 
-function Header({ compact = false }: { compact?: boolean }) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  return <header className="site-header" dir="rtl">
-    <Link href="/" className="wordmark" aria-label="أنس - الرئيسية" data-testid="link-home">أنس<span className="brand-dot">.</span></Link>
-    <button className="mobile-menu icon-button" aria-label="فتح القائمة" onClick={() => setMenuOpen(!menuOpen)} data-testid="button-menu"><Menu size={22} /></button>
-    <nav className={`site-nav ${menuOpen ? 'nav-open' : ''}`}>
-      {!compact && <><a href="/#home">الرئيسية</a><a href="/#about">عن أنس</a><a href="/#steps">كيف تسجل؟</a><a href="https://wa.me/201030609048" target="_blank" rel="noreferrer">تواصل معنا</a></>}
-      <Link href="/register" className="button button-primary header-cta" data-testid="link-start-registration">سجّل نشاطك</Link>
-      <Link href="/admin" className="admin-link" data-testid="link-admin">إدارة الحصر</Link>
-    </nav>
-  </header>;
-}
-
-function Footer() {
-  return <footer className="site-footer" dir="rtl">
-    <span className="wordmark">أنس<span className="brand-dot">.</span><small>مؤسسة أنس للتنمية البيئية والمجتمعية</small></span>
-    <div className="footer-links"><a href="#about">عن أنس</a><Link href="/register">التسجيل</Link><button onClick={() => window.dispatchEvent(new Event('open-privacy'))}>الخصوصية</button><a href="https://wa.me/201030609048">تواصل معنا</a></div>
-    <a className="footer-whatsapp" href="https://wa.me/201030609048" target="_blank" rel="noreferrer"><Phone size={16} /> واتساب 01030609048</a>
-  </footer>;
-}
-
 export function LandingPage() {
+  const router = useRouter();
+  const start = () => router.push('/register');
+  const categories = [
+    { title: 'الحرف والمنتجات اليدوية', detail: 'فخار، خوص، نسيج ومشغولات', Icon: BedDouble },
+    { title: 'الإقامة والضيافة', detail: 'فنادق، بيوت ضيافة واستضافة', Icon: BedDouble },
+    { title: 'الطعام والمنتجات المحلية', detail: 'وجبات، فطير ومنتجات ريفية', Icon: Utensils },
+    { title: 'النقل والسفاري', detail: 'نقل محلي وتنقل صحراوي', Icon: CarFront },
+    { title: 'التجارب والإرشاد والأنشطة', detail: 'أنشطة وتجارب وتعريف بالمواقع', Icon: MapPinned },
+    { title: 'التدريب والتعليم', detail: 'مدربون وورش ومراكز تعليمية', Icon: GraduationCap },
+    { title: 'المهن والخدمات المساندة', detail: 'تصوير، صيانة وتنظيم وخدمات', Icon: BriefcaseBusiness },
+    { title: 'نشاط آخر', detail: 'عرّفنا بما تقدمه', Icon: Ellipsis },
+  ];
+  const centersArabic = ['الفيوم', 'إطسا', 'سنورس', 'طامية', 'أبشواي', 'يوسف الصديق'];
+  const registrationSteps: { number: number; title: string; Icon: LucideIcon }[] = [
+    { number: 1, title: 'نسجل بياناتك', Icon: FileText },
+    { number: 2, title: 'نراجع المعلومات', Icon: CircleHelp },
+    { number: 3, title: 'نتواصل عند الحاجة', Icon: UsersRound },
+  ];
+  return <div className="landing-page reference-landing" dir="rtl">
+    <SiteHeader activePath="/" />
+    <main>
+      <section className="hero-section" id="home">
+        <div className="hero-copy"><span className="eyebrow">مؤسسة أنس للتنمية البيئية والمجتمعية</span><h1>حرفتك. مهنتك. خدمتك.<br />لها مكان في أنس.</h1><p>نسجل الأنشطة المحلية في كل مراكز الفيوم لفهم احتياجات أصحابها وتنظيم التنمية المتابعة.</p>
+          <div className="hero-actions"><button onClick={start} className="button button-primary">سجّل نشاطك الآن <ArrowLeft size={17} /></button><a href="#steps" className="text-link">اعرف خطوات التسجيل</a></div>
+          <div className="hero-meta"><span>التسجيل مجاني</span><span>لا تحتاج حسابًا</span><span>تحتاج مساعدة؟ تواصل معنا</span></div>
+        </div><div className="hero-art" role="img" aria-label="حرفي يعمل على تشكيل الفخار"><div className="hero-image" /></div>
+      </section>
+      <section className="category-section page-width"><div className="section-heading"><h2>مين يقدر يسجل؟</h2></div>
+        <div className="category-grid">{categories.map(({ title, detail, Icon }) => <button key={title} className="category-tile" onClick={start}><Icon className="tile-icon" size={42} strokeWidth={1.7} /><b>{title}</b><small>{detail}</small></button>)}</div>
+      </section>
+      <section className="center-band ">
+        <div className="page-width center-content">
+          <h2>من كل مراكز الفيوم</h2>
+          <div className="center-pills">
+            {centersArabic.map((center) => 
+            <span key={center}>{center}</span>)}
+            </div>
+            <p>اختر مركز نشاطك، ثم اكتب القرية أو الحي أو العزبة.</p>
+            </div>
+            </section>
+      <section className="steps-section page-width" id="steps"><div className="section-heading"><h2>بعد ما تسجل</h2></div><div className="steps-row">
+        {registrationSteps.map(({ number, title, Icon }) => <div className="step-tile" key={number}><span className="step-number">{number}</span><div><Icon size={38} /> <b>{title}</b></div></div>)}
+      </div><p className="steps-note">استلام البيانات هو بداية الحصر، والنشر يحتاج مراجعة وموافقة منفصلة.</p></section>
+      <section className="story-banner page-width"><div><h2>مع اقتراب مهرجان قرية تونس للفخار والحرف اليدوية</h2><strong>٥–٧ نوفمبر ٢٠٢٦</strong><p>تسجيل أنس مستقل عن تسجيل عارضي المهرجان.</p></div></section>
+      <section className="register-cta page-width"><span className="eyebrow">خطوة بسيطة للتعريف بنشاطك</span><h2>ابدأ بتسجيل نشاطك</h2><p>خطوة بسيطة للتعريف بنشاطك ومكانه وأهم احتياجاتك.</p><button onClick={start} className="button button-light">سجّل الآن</button><small>التسجيل لا يضمن دعمًا أو فرص عمل، ولا يعني اعتمادًا أو ترخيصًا.</small></section>
+      <SiteFooter />
+    </main>
+  </div>;
+}
+
+function OldLandingPage() {
   const router = useRouter();
   const [shared, setShared] = useState(false);
   const start = () => router.push('/register');
@@ -52,7 +86,7 @@ export function LandingPage() {
     ['التجارب والإرشاد والأنشطة', '⌖'], ['التدريب والتعليم', '⌑'], ['المهن والخدمات المساندة', '⌘'], ['نشاط آخر', '…'],
   ];
   return <div className="landing-page" dir="rtl">
-    <Header />
+    <SiteHeader />
     <main>
       <section className="hero-section" id="home">
         <div className="hero-copy">
@@ -92,7 +126,7 @@ export function LandingPage() {
       <section className="register-cta page-width">
         <div className="cta-pattern">فــيــوم</div><span className="eyebrow">خطوة بسيطة، أثرها كبير</span><h2>ابدأ بتسجيل نشاطك</h2><p>عرّفنا بنشاطك ومكانه وأهم احتياجاتك.</p><button onClick={start} className="button button-light" data-testid="button-bottom-register">سجّل الآن <ArrowLeft size={16} /></button><small>التسجيل لا يضمن عملًا أو ترخيصًا، ولا يعني اعتمادًا أو ترخيصًا.</small>
       </section>
-      <Footer />
+      <SiteFooter />
     </main>
     {shared && <Modal title="شارك أنس مع أصحاب الحرف" onClose={() => setShared(false)}><p>ساعد أصحاب الأنشطة المحلية في الفيوم على التسجيل والتعريف بخدماتهم.</p><button className="button button-primary full-width" onClick={() => { void navigator.clipboard?.writeText(window.location.origin); setShared(false); }}>نسخ رابط التسجيل</button></Modal>}
     <button className="floating-share" onClick={() => setShared(true)} aria-label="مشاركة التسجيل" data-testid="button-share"><Share2 size={18} /></button>
@@ -101,6 +135,7 @@ export function LandingPage() {
 
 export function RegistrationPage() {
   const router = useRouter();
+  const { mutateAsync: createRegistration, isPending } = useCreateRegistration();
   const [step, setStep] = useState(1);
   const [draft, setDraft] = useState<RegistrationDraft>(blank);
   const [consent, setConsent] = useState(false);
@@ -118,15 +153,22 @@ export function RegistrationPage() {
   };
   const next = () => { const message = validateStep(); if (message) { setError(message); return; } setError(''); setStep((current) => Math.min(4, current + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); };
   const back = () => { setError(''); setStep((current) => Math.max(1, current - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); };
-  const submit = () => {
+  const submit = async () => {
     if (!consent) { setError('يرجى تأكيد صحة البيانات والموافقة على استخدامها.'); return; }
-    const entry = recordStore.save(draft);
-    sessionStorage.setItem('anas-last-entry', JSON.stringify(entry));
-    router.push('/confirmation');
+    if (isPending) return;
+
+    try {
+      setError('');
+      const registration = await createRegistration({ ...draft, consent: true });
+      sessionStorage.setItem('anas-last-entry', JSON.stringify(registration));
+      router.push('/confirmation');
+    } catch (submissionError) {
+      setError(getApiErrorMessage(submissionError));
+    }
   };
   const specialties = categoriesDetails[draft.category] ?? [];
   return <main className="registration-shell" dir="rtl">
-    <div className="registration-top"><Link href="/" className="wordmark" data-testid="link-register-home">أنس<span className="brand-dot">.</span></Link><div className="top-actions"><Link href="/">الرئيسية</Link><a href="https://wa.me/201030609048"><CircleHelp size={15} /> مساعدة</a></div></div>
+    <div className="registration-top"><Link href="/" className="wordmark" data-testid="link-register-home">أنس<span className="brand-dot">.</span></Link><div className="top-actions"><Link href="/">الرئيسية</Link><Link href="/about">عن أنس</Link><Link href="/contact"><CircleHelp size={15} /> مساعدة</Link></div></div>
     <div className="registration-layout">
       <aside className="registration-aside">
         <div className="aside-card"><h3>ابدأ ببيانات بسيطة</h3>{['التسجيل مجاني', 'لا تحتاج إنشاء حساب', 'لا نطلب رقم بطاقة أو بيانات بنكية', 'لا ننشر بياناتك تلقائيًا'].map((line, i) => <div className="aside-line" key={line}><span>{['✳', '♙', '▤', '⬡'][i]}</span>{line}</div>)}</div>
@@ -170,13 +212,12 @@ export function RegistrationPage() {
         </div>}
         <div className="wizard-actions">
           {step > 1 && <button className="button button-outline" onClick={back} data-testid="button-previous"><ArrowRight size={17} /> السابق</button>}
-          {step < 4 ? <button className="button button-primary" onClick={next} data-testid="button-next">التالي <ArrowLeft size={17} /></button> : <button className="button button-primary" onClick={submit} disabled={!consent} data-testid="button-submit-registration">أرسل التسجيل <ArrowLeft size={17} /></button>}
+          {step < 4 ? <button className="button button-primary" onClick={next} data-testid="button-next">التالي <ArrowLeft size={17} /></button> : <button className="button button-primary" onClick={() => void submit()} disabled={!consent || isPending} data-testid="button-submit-registration">{isPending ? 'جارٍ إرسال التسجيل...' : 'أرسل التسجيل'} <ArrowLeft size={17} /></button>}
         </div>
         <p className="wizard-disclaimer">{step === 4 ? 'التسجيل لا يعني اعتمادًا أو ترخيصًا، ولا يضمن الحصول على دعم أو فرص عمل.' : 'أكمل الحقول المطلوبة للمتابعة.'}</p>
-        <p className="local-only-note">هذه معاينة محلية؛ تُحفظ البيانات على هذا الجهاز فقط ولا تُرسل إلى فريق أنس.</p>
       </section>
     </div>
-    <footer className="registration-footer">مؤسسة أنس للتنمية البيئية والمجتمعية <a href="#privacy" onClick={(e) => { e.preventDefault(); window.dispatchEvent(new Event('open-privacy')); }}>الخصوصية</a></footer>
+    <footer className="registration-footer">مؤسسة أنس للتنمية البيئية والمجتمعية <Link href="#privacy" onClick={(e) => { e.preventDefault(); window.dispatchEvent(new Event('open-privacy')); }}>الخصوصية</Link></footer>
   </main>;
 }
 
@@ -194,36 +235,36 @@ function ReviewCard({ title, rows, onEdit }: { title: string; rows: [string, str
 }
 
 export function ConfirmationPage() {
-  const [entry, setEntry] = useState<Entry | null>(null);
+  const [entry, setEntry] = useState<RegistrationConfirmation | null>(null);
   const [copied, setCopied] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   useEffect(() => {
     try {
       const value = sessionStorage.getItem('anas-last-entry');
-      setEntry(value ? JSON.parse(value) as Entry : null);
+      setEntry(value ? JSON.parse(value) as RegistrationConfirmation : null);
     } catch {
       setEntry(null);
     }
   }, []);
-  const copy = async () => { if (!entry) return; try { await navigator.clipboard.writeText(entry.id); } catch { /* clipboard unavailable */ } setCopied(true); window.setTimeout(() => setCopied(false), 1800); };
+  const copy = async () => { if (!entry) return; try { await navigator.clipboard.writeText(entry.referenceNumber); } catch { /* clipboard unavailable */ } setCopied(true); window.setTimeout(() => setCopied(false), 1800); };
   const share = async () => {
-    const text = `سجّلت نشاطي في أنس، رقم التسجيل ${entry?.id}`;
+    const text = `سجّلت نشاطي في أنس، رقم التسجيل ${entry?.referenceNumber}`;
     if (navigator.share) { try { await navigator.share({ title: 'التسجيل في أنس', text, url: window.location.origin }); } catch { /* user dismissed */ } }
     else setShareOpen(true);
   };
-  if (!entry) return <main className="confirmation-shell" dir="rtl"><Header compact /><section className="confirmation-card"><h1>لم نعثر على تسجيل في هذه الجلسة</h1><Link href="/register" className="button button-primary">ابدأ التسجيل</Link></section></main>;
+  if (!entry) return <main className="confirmation-shell" dir="rtl"><SiteHeader compact /><section className="confirmation-card"><h1>لم نعثر على تسجيل في هذه الجلسة</h1><Link href="/register" className="button button-primary">ابدأ التسجيل</Link></section></main>;
   return <main className="confirmation-shell" dir="rtl">
-    <div className="confirmation-top"><Link href="/" className="wordmark">أنس<span className="brand-dot">.</span></Link><a href="https://wa.me/201030609048"><CircleHelp size={17} /> مساعدة</a></div>
-    <section className="confirmation-intro"><div className="success-mark"><Check size={30} strokeWidth={3} /></div><h1>تم حفظ بيانات نشاطك</h1><p>شكرًا لمشاركتك في معاينة تسجيل أنشطة الفيوم.<br />هذه البيانات محفوظة محليًا فقط ولا تصل إلى فريق أنس.</p></section>
+    <div className="confirmation-top"><Link href="/" className="wordmark">أنس<span className="brand-dot">.</span></Link><Link href="/contact"><CircleHelp size={17} /> مساعدة</Link></div>
+    <section className="confirmation-intro"><div className="success-mark"><Check size={30} strokeWidth={3} /></div><h1>تم استلام تسجيل نشاطك</h1><p>شكرًا لمشاركتك في تسجيل أنشطة الفيوم.<br />سيُراجع فريق أنس بياناتك عند الحاجة.</p></section>
     <div className="confirmation-stack">
-      <section className="confirmation-card reference-card"><div className="card-title"><FileText /><h2>رقم التسجيل المرجعي</h2></div><strong className="reference-number">{entry.id}</strong><button className="button button-soft copy-button" onClick={copy} data-testid="button-copy-number"><Copy size={16} />{copied ? 'تم نسخ الرقم' : 'نسخ الرقم'}</button><small>احتفظ بهذا الرقم عند التواصل بشأن تسجيلك.</small></section>
-      <section className="confirmation-card status-card"><div className="card-title"><span className="status-clock">◷</span><h2>حالة التسجيل</h2></div><span className="status-badge status-received">حفظ محلي</span><p>حُفظت البيانات على هذا الجهاز فقط؛ لم يتم إرسالها أو مراجعتها من الفريق.</p></section>
+      <section className="confirmation-card reference-card"><div className="card-title"><FileText /><h2>رقم التسجيل المرجعي</h2></div><strong className="reference-number">{entry.referenceNumber}</strong><button className="button button-soft copy-button" onClick={copy} data-testid="button-copy-number"><Copy size={16} />{copied ? 'تم نسخ الرقم' : 'نسخ الرقم'}</button><small>احتفظ بهذا الرقم عند التواصل بشأن تسجيلك.</small></section>
+      <section className="confirmation-card status-card"><div className="card-title"><span className="status-clock">◷</span><h2>حالة التسجيل</h2></div><span className="status-badge status-received">تم الاستلام</span><p>تم إرسال بياناتك بنجاح، وسيُراجعها فريق أنس عند الحاجة.</p></section>
       <section className="confirmation-card"><div className="card-title"><FileText /><h2>ماذا يحدث بعد ذلك؟</h2></div><ul className="next-list"><li>نراجع معلومات النشاط</li><li>نطلب استكمالًا عند الحاجة</li><li>النشر يحتاج مراجعة وموافقة منفصلة</li></ul></section>
-      <section className="confirmation-card"><div className="card-title"><Phone /><h2>تحتاج تعديل بياناتك؟</h2></div><p>تواصل معنا واذكر رقم التسجيل المرجعي.</p><a href={`https://wa.me/201030609048?text=${encodeURIComponent(`مرحبًا، أريد تعديل بيانات التسجيل ${entry.id}`)}`} target="_blank" rel="noreferrer" className="button button-outline full-width" data-testid="link-contact-edit"><Phone size={16} /> تواصل لتعديل البيانات</a><a className="whatsapp-number" href="https://wa.me/201030609048">01030609048</a><button className="inline-link privacy-link" onClick={() => window.dispatchEvent(new Event('open-privacy'))}>الخصوصية وطلب حذف البيانات</button></section>
+      <section className="confirmation-card"><div className="card-title"><Phone /><h2>تحتاج تعديل بياناتك؟</h2></div><p>تواصل معنا واذكر رقم التسجيل المرجعي.</p><a href={`https://wa.me/201030609048?text=${encodeURIComponent(`مرحبًا، أريد تعديل بيانات التسجيل ${entry.referenceNumber}`)}`} target="_blank" rel="noreferrer" className="button button-outline full-width" data-testid="link-contact-edit"><Phone size={16} /> تواصل لتعديل البيانات</a><a className="whatsapp-number" href="https://wa.me/201030609048">01030609048</a><button className="inline-link privacy-link" onClick={() => window.dispatchEvent(new Event('open-privacy'))}>الخصوصية وطلب حذف البيانات</button></section>
       <section className="confirmation-card share-card"><div className="card-title"><Share2 /><h2>تعرف صاحب حرفة أو مهنة أو خدمة؟</h2></div><p>شارك معه دعوة التسجيل في أنس.</p><button className="button button-primary full-width" onClick={() => void share()} data-testid="button-share-registration"><Share2 size={18} /> شارك دعوة التسجيل</button></section>
     </div>
     <Link href="/" className="return-home">العودة للرئيسية</Link>
     <footer className="registration-footer">مؤسسة أنس للتنمية البيئية والمجتمعية</footer>
-    {shareOpen && <Modal title="مشاركة دعوة التسجيل" onClose={() => setShareOpen(false)}><p>سجّل نشاطك المحلي في أنس. رقم التسجيل: {entry.id}</p><button className="button button-primary full-width" onClick={() => { void navigator.clipboard?.writeText(`${window.location.origin}/register`); setShareOpen(false); }}>نسخ رابط الدعوة</button></Modal>}
+    {shareOpen && <Modal title="مشاركة دعوة التسجيل" onClose={() => setShareOpen(false)}><p>سجّل نشاطك المحلي في أنس. رقم التسجيل: {entry.referenceNumber}</p><button className="button button-primary full-width" onClick={() => { void navigator.clipboard?.writeText(`${window.location.origin}/register`); setShareOpen(false); }}>نسخ رابط الدعوة</button></Modal>}
   </main>;
 }
